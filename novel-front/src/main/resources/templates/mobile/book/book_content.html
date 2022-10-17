@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta th:if="${catId == 9}" name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1">
+    <meta th:if="${catId != 9}" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title th:utext="${book.bookName}+${bookIndex.indexName}"></title>
+
+    <meta name="keywords" th:content="${book.bookName}+','+${bookIndex.indexName}">
+
+    <meta name="description"
+          th:content="${book.bookName}+'最新更新章节免费在线阅读TXT下载'">
+
+
+
+    <div th:include="mobile/common/css :: css"></div>
+
+    <script src="/artDialog-6.0.4/lib/jquery-1.10.2.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/javascript/jquery.cookie.js"></script>
+
+    <script src="/javascript/common.js"></script>
+
+    <script type="text/javascript">
+      function reinitIframe(){
+
+        var iframe = document.getElementById("frame_content");
+        try{
+          iframe.height =  iframe.contentWindow.document.documentElement.scrollHeight;
+        }catch (ex){}
+      }
+      window.setInterval("reinitIframe()", 200);
+    </script>
+
+    <script th:fragment="js" src="/mobile/layui/layui.js"></script>
+    </div>
+
+    <style type="text/css">
+  .line-limit-length {
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+
+  }
+
+  .indexP p a {
+      color: #4c6978;
+  }
+
+  .Readarea {
+      font-size: 18px;
+      line-height: 35px;
+      padding: 10px;
+      color: #333;
+  }
+
+  div, p {
+      wrap-work: break-word;
+      word-break: break-all;
+      word-wrap: break-word;
+      word-break: normal;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      -ms-box-sizing: border-box;
+  }
+
+  .indexDiv a {
+      margin-left: 20px;
+  }
+
+  .Readpage {
+      font-size: 14px;
+      padding: 0;
+      background: #d4eaf2;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+  }
+
+  div, p {
+      wrap-work: break-word;
+      word-break: break-all;
+      word-wrap: break-word;
+      word-break: normal;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      -ms-box-sizing: border-box;
+  }
+
+  * {
+      margin: 0;
+      padding: 0;
+      /* background-attachment: fixed; */
+  }
+
+  user agent stylesheet
+  p {
+      display: block;
+      -webkit-margin-before: 1em;
+      -webkit-margin-after: 1em;
+      -webkit-margin-start: 0px;
+      -webkit-margin-end: 0px;
+  }
+
+  .huyanon {
+      border: 1px solid #64c878;
+      box-shadow: 0 1px 2px #b9ecc4 inset, 0 -1px 0 #6c9f76 inset, 0 -2px 3px #b9ecc4 inset;
+      background: -webkit-linear-gradient(top, #90dfa2, #84d494);
+      background: -moz-linear-gradient(top, #90dfa2, #84d494);
+      background: linear-gradient(top, #90dfa2, #84d494);
+  }
+
+  .Readpage a {
+      font-size: 16px;
+      padding: 2px 2px;
+      line-height: 35px;
+  }
+
+  .lightoff, .huyanoff, .sizebgon {
+      border: 1px solid #333;
+      box-shadow: 0 1px 2px #8b8b8b inset, 0 -1px 0 #3d3d3d inset, 0 -2px 3px #8b8b8b inset;
+      background: -webkit-linear-gradient(top, #656565, #4c4c4c);
+      background: -moz-linear-gradient(top, #656565, #4a4a4a);
+      background: linear-gradient(top, #656565, #4a4a4a);
+  }
+
+  .button {
+      width: 40px;
+      line-height: 38px;
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 1px #333;
+      border-radius: 5px;
+      margin: 3px 0px 0px 0;
+      position: relative;
+      overflow: hidden;
+  }
+
+  a {
+      color: #4c6978;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+  }
+
+  .lighton {
+      border: 1px solid #d2a000;
+      box-shadow: 0 1px 2px #fedd71 inset, 0 -1px 0 #a38b39 inset, 0 -2px 3px #fedd71 inset;
+      background: -webkit-linear-gradient(top, #fece34, #d8a605);
+      background: -moz-linear-gradient(top, #fece34, #d8a605);
+      background: linear-gradient(top, #fece34, #d8a605);
+  }
+
+  .screen_toolbar {
+      position: fixed;
+      width: 100%;
+      left: 0px;
+      bottom: 100px;
+      text-align: center;
+  }
+  .flex-container {
+      width: 80%;
+      height: auto;
+      margin: 10%;
+      text-align: center;
+      flex-wrap: wrap;
+  }
+
+  .flex-item {
+      height: 30px;
+      font-size: 14px;
+      display: inline-block;
+      border-radius: 3px;
+      text-align: center;
+      background: rgba(255,255,255,0.5);
+      opacity:.95;
+      margin-right: 20px;
+      margin-bottom:10px;
+
+  }
+  .flex-item2 {
+      width:60px;
+      font-size: 18px;
+      display: inline-block;
+      border-radius: 3px;
+      text-align: center;
+      background: rgba(255,255,255,0.5);
+      opacity:.95;
+      margin-right: 20px;
+      margin-bottom:10px;
+
+  }
+  .zhezhao{
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    background: #000;
+    width: 100%;
+    height: 100%;
+    //opacity: 0.5;
+   }
+   .tankuang{
+    position: relative;
+    background: #fff;
+    width: 100%;
+    height: 90%;
+    border-radius: 5px;
+    margin: 5% auto;
+    overflow:auto;
+   }
+   #header{
+    height: 40px;
+   }
+   #header-right{
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 5px;
+    background: red;
+    color: #fff;
+    right: 5px;
+    top: 5px;
+    text-align: center;
+   }
+</style>
+</head>
+<body id="read" ng-controller="mainController" ng-app="app">
+<script src="/js/angular.js"></script>
+<script src="/mobile/layui/layui.js"></script>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link href="/mobile/layui/css/layui.css" rel="stylesheet"/>
+
+<link rel="stylesheet" href="/mobile/css/index.css">
+
+
+<link rel="stylesheet" href="/artDialog-6.0.4/css/ui-dialog.css">
+<script src="/artDialog-6.0.4/dist/dialog-min.js"></script>
+<script src="/mobile/js/mobileJsBookContent.js" type="text/javascript"></script>
+<div id="content">
+
+
+    <input type="hidden" id="bookIdHidden" th:value="${book.id}"/>
+
+    <input type="hidden" id="bookNameHidden" th:value="${book.bookName}"/>
+
+    <input type="hidden" id="contentIdHidden" th:value="${bookIndex.id}"/>
+
+    <input type="hidden" id="indexNameHidden" th:value="${bookIndex.indexName}"/>
+
+    <input type="hidden" id="indexNumHidden" th:value="${bookIndex.indexNum}"/>
+    <input type="hidden" id="nowLineIdHidden" value="0"/>
+    <script>
+      var token = localStorage.getItem("token");
+    </script>
+
+    <div style="height: 50px;line-height: 50px;text-align: center" class="layui-header header header-doc  layui-bg-cyan">
+
+        <div style="width:10%;float: left;margin-left: 10px">
+            <a href="javascript:history.go(-1)">
+                <i style="font-size: 20px;color: #fff;" class="layui-icon">&#xe65c;</i></a>
+        </div>
+        <a style="color: #ffffff;" th:href="'/book/'+ ${book.id} + '.html'"><b style="padding-left: 5%;float: left;width: 69%" class="line-limit-length" th:utext="${bookIndex.indexName}+' '+${book.bookName}"></b></a>
+        <div style="width:10%;float: right;margin-right: 10px"><a href="/">
+            <i style="font-size: 20px;color: #fff;" class="layui-icon">&#xe68e;</i>
+        </a>
+        </div>
+    </div>
+
+
+    <p class="Readpage" style="background:#FFFFFF;padding:2px;">
+        <a id="lightdiv" class="button lightoff" onclick="nr_setbg('light')">关灯</a>
+        <a id="huyandiv" class="button huyanon" onclick="nr_setbg('huyan')">护眼</a>&nbsp;&nbsp;&nbsp;&nbsp;
+        字体：<a id="fontbig" class="sizebg" onclick="nr_setbg('big')">大</a> <a id="fontmiddle" class="button sizebgon"
+                                                                             onclick="nr_setbg('middle')">中</a> <a
+            id="fontsmall" class="sizebg" onclick="nr_setbg('small')">小</a>
+    </p>
+    <div class="indexDiv" style="height: 42px;line-height: 42px;text-align:center;background: #f2f2f2">
+
+        <a style="color: #333" th:href="'javascript:enterPreIndexPage(\''+${book.id}+'\',\''+${preBookIndexId}+'\');'">上一章</a>
+        <a style="color: #333" th:href="'/book/indexList-'+${book.id}+'.html'">目录</a>
+        <a style="color: #333" th:href="'javascript:enterNextIndexPage(\''+${book.id}+'\',\''+${nextBookIndexId}+'\');'">下一掌</a>
+    </div>
+
+
+
+    <!--<div id="screenInput" class="screen_toolbar" style="display: none">
+        <div style="height: 5px" class="layui-col-xs2 layui-col-sm3 layui-col-md3 layui-col-lg3"></div>
+        <div class="layui-col-xs6 layui-col-sm4 layui-col-md4 layui-col-lg4">
+          <input type="text" id="screenBulletText" required lay-verify="required" placeholder="请输入弹幕内容,右下角开关可控制弹幕是否开启" autocomplete="off"
+                 class="layui-input">
+
+        </div>
+        <div class="layui-col-xs2 layui-col-sm1 layui-col-md1 layui-col-lg1">
+          <button class="layui-btn send">发送</button>
+        </div>
+    </div>
+    <form id="screenSwitch" class="layui-form">
+      <div class="layui-form-item" style="position: fixed;right: 0px;bottom: 100px" title="弹幕开关">
+        &lt;!&ndash; <label  class="layui-form-label" style="opacity:0.5;font-weight: bold;color: red;">弹幕</label>&ndash;&gt;
+        <div class="layui-input-block">
+          <input class="clear" type="checkbox" name="switch" lay-skin="switch">
+        </div>
+      </div>
+    </form>-->
+    <div th:replace="mobile/common/js :: js">
+    </div>
+    <div id="chaptercontent" class="Readarea ReadAjax_content screen_container"
+         style="color: rgb(0, 0, 0); font-size: 20px;" th:if="${!needBuy}">
+        <p style="width:100%;text-alight:center; overflow: auto;-webkit-overflow-scrolling:touch;" >&nbsp;&nbsp;&nbsp;&nbsp;
+            <span
+                    th:utext="${bookContent.content}"></span></p>
+    </div>
+    <div  class="Readarea ReadAjax_content screen_container"
+          style="color: rgb(0, 0, 0); font-size: 20px;background-color: #fff" th:if="${needBuy}">
+        <h5>此章为VIP章节，需要订阅后才能继续阅读</h5>
+        价格：<span style="color: red" th:text="${bookIndex.bookPrice}+'屋币(1元=100屋币)'"></span><br/>
+        <a href="javascript:buyBookIndex()"  type="button" class="layui-btn layui-btn-sm layui-btn-radius">购买</a>
+
+    </div>
+    <div class="indexDiv" style="height: 42px;line-height: 42px;text-align:center;background: #f2f2f2">
+
+        <a style="color: #333" th:href="'javascript:enterPreIndexPage(\''+${book.id}+'\',\''+${preBookIndexId}+'\');'">上一章</a>
+        <a style="color: #333" th:href="'/book/indexList-'+${book.id}+'.html'">目录</a>
+        <a style="color: #333" th:href="'javascript:enterNextIndexPage(\''+${book.id}+'\',\''+${nextBookIndexId}+'\');'">下一章</a>
+
+    </div>
+    <div>
+        <p>下一章的更多选择:</p>
+    </div>
+    <div id="SignFrame2" class="flex-container">
+        <div class="flex-item2" onclick="addNextPage()"><br>
+            <i class="layui-icon layui-icon-addition" style="font-size: 30px; color: #1E9FFF;"></i>
+        </div>
+    </div>
+
+
+</div>
+
+
+<div th:replace="mobile/common/footer :: footer">
+</div>
+
+<a name="buttom"></a>
+
+<div class="zhezhao" id='zhezhao'>
+    <div class="tankuang">
+        <div >
+            <div class="alert alert-warning hintDiv" id="hintDiv">
+                <strong>评论不能为空</strong>
+            </div>
+
+            <div class="container" style="width:100%;">
+                <div class="saying">
+                    <div class="meta-top" style="visibility: hidden;">
+                        <!--avatar-->
+                        <a href="javascript:void(0);">
+                            <img class="avatar" ng-src="{{saying.avatar}}">
+                        </a>
+                        <!--nickname-->
+                        <p class="author">
+                            <a class="name" href="javascript:void(0);">{{saying.author}}</a>
+                        </p>
+                        <!--create time-->
+                        <span class="publish-time">{{saying.createTime}}</span>
+                    </div>
+                    <!--content-->
+                    <p class="content">{{saying.sayingContent}}</p>
+                </div>
+
+                <div class="comment-footer clearfix" style="visibility: hidden">
+                    <a class="like pull-left" href="javascript:void(0);" ng-click="like(saying.id)">
+                        <span ng-if="isShowLike" class="glyphicon glyphicon-heart"></span>
+                        <span ng-if="!isShowLike" class="glyphicon glyphicon-heart-empty"></span>
+                        <span>喜欢({{saying.likes.length}})</span>
+                    </a>
+                    <a class="like" href="javascript:void(0);">
+                        <span class="glyphicon glyphicon-share-alt"></span>
+                        <span>分享</span>
+                    </a>
+                </div>
+
+                <div class="commment-head">
+        <span class="pull-left" style="margin-top:0px;">
+          {{saying.flcs.length}}条评论
+        </span>
+                    <a class="like" href="javascript:void(0);" ng-click="showComment()">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                        <span>添加新评论</span>
+                    </a>
+                </div>
+
+                <!--comment text-->
+                <form id="comment" ng-if="isShowComment" novalidate>
+                    <div class="comment-text">
+                        <textarea autofocus placeholder="写下你的评论…" maxlength="2000" ng-model="cmt.fstlvlcmt"></textarea>
+                        <div style="text-align:right;">
+                            <button class="btn btn-sm btn-default" style="float:left;" ng-click="showComment()">取消</button>
+                            <button class="btn btn-sm btn-info" ng-click="firstCommentbefore(saying.id)">提交</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="comment-list">
+                    <!--first level comment-->
+                    <div class="first-level" ng-repeat="comment in saying.flcs">
+                        <div class="meta-top">
+                            <a href="javascript:void(0);">
+                                <img class="avatar" ng-src="{{comment.avatar}}">
+                            </a>
+                            <p class="author">
+                                <a class="name" href="javascript:void(0);">{{comment.commenter}}</a>
+                            </p>
+                            <div class="comment-footer clearfix">
+                                <span class="publish-time pull-left" style="margin-top:0px;">{{comment.commentTime}}</span>
+                                <i class="layui-icon layui-icon-praise" flc_id="{{comment.id}}" onclick="fLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{comment.thumpsup}}</i>
+                                <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, comment.commenter)">
+                                    <span>回复</span>
+                                </a>
+                            </div>
+                        </div>
+                        <p class="content">{{comment.commentContent}}</p>
+
+                        <!--second level comment-->
+                        <div class="second-level" ng-repeat="childComment in comment.slcs">
+                            <p class="reply">
+                                <a href="javascript:void(0);" class="blue-link">{{childComment.replier}}</a>:
+                                <a href="javascript:void(0);" class="blue-link">@{{childComment.toCommenter}}</a>
+                                <span>{{childComment.replyContent}}</span>
+                            </p>
+                            <div class="comment-footer clearfix">
+                                <span class="publish-time pull-left" style="margin-top:0px;">
+                                {{childComment.replyTime}}
+                                </span>
+                                <i class="layui-icon layui-icon-praise" flcid="{{childComment.flcId}}" slcid="{{childComment.id}}" onclick="sLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{childComment.thumpsup}}</i>
+
+                                <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, childComment.replier)">
+                                <span>回复</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <form id="childComment" ng-if="comment.isShowChildComment" novalidate>
+                            <div class="comment-text">
+                                <textarea autofocus maxlength="2000" ng-model="comment.scndlvlcmt"></textarea>
+                                <div style="text-align:right;">
+                                    <button class="btn btn-sm btn-default" style="float:left;" ng-click="hideSecondComment(comment)">取消</button>
+                                    <button class="btn btn-sm btn-info" ng-click="reply(saying.id, comment)">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close"
+                                    data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Delete
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            确定删除评论?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger" ng-click="confirm()">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div>
+            </div><!-- /.modal -->
+
+            <div class="modal fade" id="slcModal" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close"
+                                    data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Delete
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            确定删除评论?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger" ng-click="confirmSlc()">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div>
+            </div><!-- /.modal -->
+        </div>
+
+    </div>
+    <div style="text-align:center;"><button type="button" onclick="showCommentDiv(this)">退出评论!</button></div>
+</div>
+</body>
+
+<script>
+  var ua = navigator.userAgent;
+
+  var ipad = ua.match(/(iPad).*OS\s([\d_]+)/),
+
+      isIphone =!ipad && ua.match(/(iPhone\sOS)\s([\d_]+)/),
+
+      isAndroid = ua.match(/(Android)\s+([\d.]+)/),
+
+      isMobile = isIphone || isAndroid;
+
+
+
+
+</script>
+<script>
+  (function () {
+
+    //添加阅读记录
+    $.ajax({
+      type: "POST",
+      url: "/user/addReadHistory",
+      data: {'bookId': $("#bookIdHidden").val(), 'preContentId': $("#contentIdHidden").val()},
+      dataType: "json",
+      success: function (data) {
+
+      },
+      error: function () {
+      }
+    })
+
+    $("#content").css("min-height",($(window).height()-60)+"px");
+
+
+  })();
+
+
+</script>
+
+<script src="/mobile/js/read.js"></script>
+<script type="text/javascript" src="/mobile/js/jquery.cookie.js"></script>
+<script src="/mobile/js/comment.js"></script>
+
+<script language="javascript">getset()</script>
+<script language="javascript">getset1()</script>
+<script language="javascript">
+    if( $.cookie('commentThumpCookie')==null){
+        $.cookie("commentThumpCookie",'{"Title":"存储flag的json"}');
+    }
+    if(localStorage.getItem('commentThumpStore')==null){
+        localStorage.setItem('commentThumpStore','{"Title":"存储flag的store"}');
+    }
+  //加载时会运行的代码
+  $(document).ready(function (){
+    //你的代码
+    addNextPageFromMysql();
+    changeLineNum();
+    changeCommentNum();
+    document.getElementById('zhezhao').style.display="none";
+
+  });
+  //原来的代码
+  var books = localStorage.getItem("historyBooks");
+  var item = parseInt($("#bookIdHidden").val());
+  if (books) {
+    var booksArr = JSON.parse(books);
+    if (booksArr.length >= 50) {
+      booksArr.splice(0, 1);
+    }
+    booksArr.remove(item);
+    booksArr[booksArr.length] = item;
+  } else {
+    var booksArr = [item];
+  }
+
+  localStorage.setItem("historyBooks", JSON.stringify(booksArr));//
+
+  function toMyCollect() {
+    var token = localStorage.getItem("token");
+    if (token) {
+      window.location.href = "/book/search?token=" + token;
+    } else {
+      window.location.href = "/user/login.html";
+    }
+  }
+
+  function buyBookIndex(){
+    $.ajax({
+      type: "POST",
+      url: "/user/buyBookIndex",
+      data: {'bookId':$("#bookIdHidden").val(),"bookName":$("#bookNameHidden").val(),
+             "bookIndexId":$("#contentIdHidden").val(),"bookIndexName":$("#indexNameHidden").val()},
+      dataType: "json",
+      success: function (data) {
+        if (data.code == 200) {
+          location.reload();
+
+
+        } else if(data.code == 1001){
+          //未登录
+          location.href = '/user/login.html?originUrl='+decodeURIComponent(location.href);
+
+
+        }else {
+          layer.alert(data.msg);
+        }
+
+      },
+      error: function () {
+        layer.alert('网络异常');
+      }
+    })
+
+  }
+
+  $.post("/book/addVisitCount", {"bookId": $("#bookIdHidden").val()}, function () {
+  });
+
+
+  function enterPreIndexPage(bookId,bookIndexId){
+    if(bookIndexId != 0){
+      window.location.href = '/book/'+bookId+'/'+bookIndexId+".html";
+    }else{
+      window.location.href = '/book/indexList-' + bookId + '.html';
+    }
+
+  }
+  function enterNextIndexPage(bookId,bookIndexId){
+    if(bookIndexId != 0){
+      window.location.href = '/book/'+bookId+'/'+bookIndexId+".html";
+    }else{
+      window.location.href = '/book/indexList-' + bookId + '.html';
+    }
+
+  }
+
+
+</script>
+
+
+
+</html>

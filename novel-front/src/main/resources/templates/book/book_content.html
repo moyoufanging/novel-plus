@@ -1,0 +1,1042 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/header :: common_head(~{::title},~{::meta},~{::link},~{})">
+    <title th:utext="${book.bookName}+'_'+${bookIndex.indexName}+'_'+${application.website.name}"></title>
+    <meta name="keywords" th:content="${book.bookName}+'官方首发,'+${book.bookName}+'小说,'+${book.bookName}+'最新章节,'+${book.bookName}+'txt下载,'+${book.bookName}+'无弹窗,'+${book.bookName}+'吧,'+${book.bookName}+'离线完本'" />
+    <meta name="description" th:content="${book.bookName}+','+${book.bookName}+'小说阅读,'+${application.website.name}+'提供'+${book.bookName}+'首发最新章节及txt下载,'+${book.bookName}+'最新更新章节,精彩尽在'+${application.website.name}+'。'" />
+    <link rel="stylesheet" href="/css/read.css" />
+    <link href="/css/book.css" rel="stylesheet" />
+    <!-- 下面是评论区的部分 -->
+    <script src="/artDialog-6.0.4/lib/jquery-1.10.2.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/javascript/jquery.cookie.js"></script>
+    <script src="/javascript/common.js"></script>
+
+</head>
+<link href="/layui/css/layui.css" rel="stylesheet"/>
+<style type="text/css">
+.menu_left2 { width: 60px; z-index: 20; position: absolute; top: 60px; left: 50%; margin-left: -29%; }
+    .screen_toolbar {
+        position: fixed;
+        width: 100%;
+        left: 0px;
+        bottom: 0px;
+        text-align: center;
+        z-index: 100;
+    }
+            .flex-container {
+            width: 80%;
+            height: auto;
+            margin: 10%;
+            text-align: center;
+            background-color: #ebe5d8;
+            flex-wrap: wrap;
+        }
+        .flex-item {
+            width: auto;
+            height: 65px;
+            line-height: 31px;
+            font-size: 18px;
+            display: inline-block;
+            border-radius: 3px;
+            text-align: center;
+            background: rgba(255,255,255,0.5);
+            opacity:.95;
+            border: 1px solid rgba(0,0,0,.1);
+            margin: 9px;
+            word-spacing: 8px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-top: 12px;
+            padding-bottom: 65px;
+
+        }
+        .flex-item2 {
+            width: auto;
+            height: 65px;
+            line-height: 24px;
+            font-size: 18px;
+            display: inline-block;
+            border-radius: 3px;
+            text-align: center;
+            background: rgba(255,255,255,0.5);
+            opacity: .95;
+            border: 1px solid rgba(0,0,0,.1);
+            margin: 9px;
+            word-spacing: 8px;
+            padding-left: 20px;
+            padding-right: 20px;
+
+
+        }
+
+</style>
+<div th:replace="common/js :: js"></div>
+
+<body class="read_style_1"  oncontextmenu="return false" onselectstart="return false"
+      ondragstart="return false" onbeforecopy="return false" oncopy="document.selection.empty()"
+      onselect="document.selection.empty()"
+      ng-controller="mainController" ng-app="app">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/index.css">
+<script src="/javascript/myjs.js" type="text/javascript"></script>
+
+<script src="/javascript/bookdetail.js" type="text/javascript"></script>
+<script type="text/javascript">
+    BookDetail.SetReadFontFamilyClear(0);
+    var font =  localStorage.getItem("fonts");
+    var colorNum = localStorage.getItem("colorNum");
+    var fontNum = localStorage.getItem("fontNum");
+
+
+</script>
+
+<script src="/js/angular.js"></script>
+<script src="/js/comment.js"></script>
+
+<script src="/js/testFolder.js"></script>
+<input type="hidden" id="bookId" th:value="${book.id}"/>
+<input type="hidden" id="bookName" th:value="${book.bookName}"/>
+<input type="hidden" id="preIndexName" th:value="${bookIndex.indexName}"/>
+
+<input type="hidden" id="preContentId" th:value="${bookIndex.id}"/>
+<input type="hidden" id="preIndexId" th:value="${preBookIndexId}"/>
+<input type="hidden" id="nextIndexId" th:value="${nextBookIndexId}"/>
+<input type="hidden" id="nowLineId" value="0"/>
+<input type="hidden" id="preLineId" value="-5"/>
+<input type="hidden" id="nowLineclickNum" value="0"/>
+
+<div th:replace="common/top :: top('10')">
+</div>
+
+<div id="showDetail1">
+    <div class="readBody cf">
+        <div class="readMain cf">
+            <div class="readWrap">
+                <div class="bookNav">
+                    <a href="/" >首页 </a>&gt; <a th:href="'/book/bookclass.html?c='+${book.catId}" th:text="${book.catName}">
+                    </a>&gt; <a th:href="'/book/'+${book.id}+'.html'" th:utext="${book.bookName}">
+
+                    </a>
+<!--                    <button id="canGetContent" type="button" style="float: right;color: #4c88bb;background-color: #ebe5d8;border: none;" onclick="getuText()">!从本章内容开始创建章节!</button>-->
+                    <div id="canGetContent" ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="readPopup qrBox" style="display: none">
+        <a class="closePopup" href="javascript:void(0);" onclick="javascript:$('.maskBox,.qrBox').hide();"></a>
+        <div class="popupTit">
+            <h3>手机阅读</h3>
+        </div>
+        <div class="qrList">
+            <ul>
+            </ul>
+        </div>
+    </div>
+    <div class="readPopup setupBox" style="display: none;">
+        <a class="closePopup" href="javascript:void(0);" onclick="javascript:$('.maskBox,.setupBox').hide();"></a>
+        <div class="popupTit">
+            <h3>设置</h3>
+        </div>
+        <div class="setupList">
+            <ul>
+                <li class="readTheme">
+                    <em class="tit">阅读主题：</em>
+                    <a id="setup_color_white" class="white current"
+                       href="javascript:void(0);" title="白色" onclick="javascript:BookDetail.SetBackUpColor(1);"></a><a id="setup_color_green" class="green" href="javascript:void(0);" title="绿色"
+                                                                                                                       onclick="javascript:BookDetail.SetBackUpColor(2);"></a><a id="setup_color_pink" class="pink"
+                                                                                                                                                                                 href="javascript:void(0);" title="粉色" onclick="javascript:BookDetail.SetBackUpColor(3);"></a><a id="setup_color_yellow" class="yellow" href="javascript:void(0);" title="黄色"
+                                                                                                                                                                                                                                                                                 onclick="javascript:BookDetail.SetBackUpColor(4);"></a><a id="setup_color_gray" class="gray"
+                                                                                                                                                                                                                                                                                                                                           href="javascript:void(0);" title="灰色" onclick="javascript:BookDetail.SetBackUpColor(5);"></a><a id="setup_color_night" class="night" href="javascript:void(0);" title="夜间"
+                                                                                                                                                                                                                                                                                                                                                                                                                                           onclick="javascript:BookDetail.SetBackUpColor(6);"></a></li>
+                <li class="setFont setBtn"><em class="tit">正文字体：</em> <a id="setup_font_yahei" class="setYahei current"
+                                                                         href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(0);">雅黑</a> <a id="setup_font_simsun" class="setSimsun" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(1);">宋体</a> <a id="setup_font_ks" class="setKs" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(2);">楷书</a> </li>
+                <li class="fontSize setBtn"><em class="tit">字体大小：</em> <a class="small" href="javascript:void(0);"
+                                                                          onclick="javascript:BookDetail.SetReadFont(-2);">A-</a><span class="current_font"
+                                                                                                                                       id="cFonts">
+                            16</span><a class="big" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFont(2);">A+</a> </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="showDetail" >
+    <div id="left-content1" style="width:25%;float:left;">
+<!--        <div><p> <font color="red">自由更新</font> </p></div>-->
+        <div th:replace="common/left :: left2"></div>
+        <div class="read_menu">
+            <div class="menu_left" style="">
+                <ul>
+                    <li><a class="ico_catalog" th:href="'/book/indexList-'+${book.id}+'.html'"  title="目录">
+                        <b>目录</b></a></li>
+                    <li><a class="ico_page" th:href="'/book/'+${book.id}+'.html'"  title="返回书页"><b>书籍详情</b></a></li>
+                    <li class="li_shelf" id="cFavs"><a class="ico_shelf" href="javascript:void(0);" title="加入书架"
+                                                       onclick="javascript:BookDetail.AddFavorites(37,1959973,1);"><b>加书架</b></a></li>
+                    <li class="li_shelfed" style="display: none;"><a class="ico_shelfed" href="javascript:void(0);"
+                                                                     title="已收藏"><b>已收藏</b></a></li>
+
+                    <li><a class="ico_comment" th:href="'/book/comment-'+${book.id}+'.html'"  title="评论">
+                        <b>书友圈</b></a></li>
+                    <li><a class="ico_setup" href="javascript:void(0);" title="设置"><b>设置</b></a></li>
+                </ul>
+            </div>
+            <div class="menu_right" style="position: fixed; bottom: 0">
+                <ul>
+                    <li><a class="ico_pagePrev" th:href="'javascript:enterPreIndexPage(\''+${book.id}+'\',\''+${preBookIndexId}+'\');'" title="上一章"><i>上一章</i></a></li>
+                    <li><a class="ico_pageNext" th:href="'javascript:enterNextIndexPage(\''+${book.id}+'\',\''+${nextBookIndexId}+'\');'" title="下一章"><i>下一章</i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="center-content" style="width:50%;margin: auto;">
+        <div class="readWrap">
+            <div id="readcontent">
+                <div class="textbox cf">
+
+                    <div class="book_title">
+                        <h1 th:utext="${bookIndex.indexName}">
+                        </h1>
+                        <div class="textinfo">
+                            类别：<a th:href="'/book/bookclass.html?c='+${book.catId}" th:text="${book.catName}"></a>
+                            作者：<a th:href="'javascript:searchByK(\''+${book.authorName}+'\')'" th:utext="${book.authorName}"></a><span th:text="'字数：'+${bookIndex.wordCount}"></span><span th:text="'更新时间：'+${#dates.format(bookIndex.updateTime, 'yy/MM/dd HH:mm:ss')}"></span>
+                        </div>
+                    </div>
+                    <div class="txtwrap" th:if="${needBuy}">
+                        <div id="showReading" class="readBox" style="font-size: 16px; font-family: microsoft yahei">
+                            <p>
+
+                            </p>
+
+                            <div class="pc_bar" style="display: none;">
+                                <a href="javascript:void(0);" class="icon_pc" onclick="javascript:uFans.startSupportRead();">
+                                    <span><i class="icon_yb"></i><em>捧场</em></span>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="showBooking" class="orderBox">
+                            <h3>此章为VIP章节，需要订阅后才能继续阅读</h3>
+                            <form method="post" action="./2052117.html?bid=302&amp;cid=2052117" id="Form1">
+                                <ul class="order_list">
+                                    <li>价格：<span class="red" th:text="${bookIndex.bookPrice}+'屋币(1元=100屋币)'"></span></li>
+                                    <li id="panelPay" class="btns"><a class="btn_red" href="javascript:buyBookIndex()" >购买</a></li>
+
+                                </ul>
+                                <input type="hidden" name="HidCId" id="HidCId" value="2052117">
+                                <input type="hidden" name="HidBId" id="HidBId" value="302">
+                                <input type="hidden" name="HidCRank" id="HidCRank" value="49">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="txtwrap" th:if="${!needBuy}">
+                        <div id="showReading1" class="readBox" style="font-size: 16px; font-family: microsoft yahei" th:utext="${bookContent.content}" value="eeem">
+
+
+                            <div class="pc_bar" style="display: none;">
+                                <a href="javascript:void(0);" class="icon_pc" onclick="javascript:uFans.startSupportRead();">
+                                    <span><i class="icon_yb"></i><em>捧场</em></span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="nextPageBox">
+                <a class="prev" th:href="'javascript:enterPreIndexPage(\''+${book.id}+'\',\''+${preBookIndexId}+'\');'">上一章</a>
+                <a class="dir" th:href="'/book/indexList-'+${book.id}+'.html'">目录</a>
+                <a class="next" th:href="'javascript:enterNextIndexPage(\''+${book.id}+'\',\''+${nextBookIndexId}+'\');'">下一章</a>
+            </div>
+
+            <div>
+                <p>下一章的更多选择:</p>
+            </div>
+            <div id="SignFrame2" class="flex-container">
+<!--                <button class="flex-item2" onclick="addNextPage()">+</button>-->
+                <div class="flex-item2" onclick="addNextPage()"><br>
+
+                    <i class="layui-icon layui-icon-addition" style="font-size: 30px; color: #1E9FFF;"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div id="right-content1" style="width:25%;float:right;display: none;">
+        <div>
+            <div class="alert alert-warning hintDiv" id="hintDiv">
+                <strong>评论不能为空</strong>
+            </div>
+
+            <div class="container2" style="float:left;position: fixed;top: 2px;overflow-y: scroll;overflow-x: hidden;height: 100%;">
+                <div class="saying" style="visibility:hidden">
+                    <div class="meta-top">
+                        <!--avatar-->
+                        <a href="javascript:void(0);">
+                            <div ng-if="saying.avatar=='null'">
+                                <img class="avatar" ng-src="/images/man.png" src="/images/man.png">
+                            </div>
+                            <div ng-if="saying.avatar!='null'">
+                                <img class="avatar" ng-src="/{{saying.avatar}}">
+                            </div>
+                        </a>
+                        <!--nickname-->
+                        <p class="author">
+                            <a class="name" href="javascript:void(0);">{{saying.author}}</a>
+                        </p>
+                        <!--create time-->
+                        <span class="publish-time">{{saying.createTime}}</span>
+                    </div>
+                    <!--content-->
+                    <p class="content">{{saying.sayingContent}}</p>
+                </div>
+
+                <div class="comment-footer clearfix" style="visibility:hidden">
+                    <a class="like pull-left" href="javascript:void(0);" ng-click="like(saying.id)">
+                        <span ng-if="isShowLike" class="glyphicon glyphicon-heart"></span>
+                        <span ng-if="!isShowLike" class="glyphicon glyphicon-heart-empty"></span>
+                        <span>喜欢({{saying.likes.length}})</span>
+                    </a>
+                    <a class="like" href="javascript:void(0);">
+                        <span class="glyphicon glyphicon-share-alt"></span>
+                        <span>分享</span>
+                    </a>
+                </div>
+
+                <div class="commment-head">
+        <span class="pull-left" style="margin-top:0px;">
+          {{saying.flcs.length}}条评论
+        </span>
+                        <a class="like" href="javascript:void(0);" ng-click="showComment()" >
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                <span>添加新评论</span>
+                        </a>
+
+                    </a>
+                </div>
+
+                <!--comment text-->
+                <form id="comment" ng-if="isShowComment" novalidate>
+                    <div class="comment-text">
+                        <textarea autofocus placeholder="写下你的评论…" maxlength="2000" ng-model="cmt.fstlvlcmt"></textarea>
+                        <div style="text-align:right;">
+                            <button class="btn btn-sm btn-default" style="float:left;" ng-click="showComment()">取消</button>
+                            <button class="btn btn-sm btn-info" ng-click="firstCommentbefore(saying.id)">提交</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="comment-list">
+                    <!--first level comment-->
+                    <div class="first-level" ng-repeat="comment in saying.flcs">
+                        <div class="meta-top">
+                            <a href="javascript:void(0);">
+                                <div ng-if="comment.avatar=='null'">
+                                    <img class="avatar" ng-src="/images/man.png" src="/images/man.png">
+                                </div>
+
+                                <div ng-if="comment.avatar!='null'">
+                                    <img class="avatar" ng-src="/{{comment.avatar}}">
+                                </div>
+
+                            </a>
+                            <p class="author">
+                                <a class="name" href="javascript:void(0);">{{comment.commenter}}</a>
+                            </p>
+                            <div class="comment-footer clearfix">
+                                <span class="publish-time pull-left" style="margin-top:0px;">{{comment.commentTime}}</span>
+                                <i class="layui-icon layui-icon-praise" flc_id="{{comment.id}}" onclick="fLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{comment.thumpsup}}</i>
+                                <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, comment.commenter)">
+                                    <span>回复</span>
+                                </a>
+                            </div>
+                        </div>
+                        <p class="content">{{comment.commentContent}}</p>
+
+                        <!--second level comment-->
+                        <div class="second-level" ng-repeat="childComment in comment.slcs">
+                            <p class="reply">
+                                <a href="javascript:void(0);" class="blue-link">{{childComment.replier}}</a>:
+                                <a href="javascript:void(0);" class="blue-link">@{{childComment.toCommenter}}</a>
+                                <span>{{childComment.replyContent}}</span>
+                            </p>
+                            <div class="comment-footer clearfix">
+                              <span class="publish-time pull-left" style="margin-top:0px;">
+                                {{childComment.replyTime}}
+                              </span>
+                                    <i class="layui-icon layui-icon-praise" flcid="{{childComment.flcId}}" slcid="{{childComment.id}}" onclick="sLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{childComment.thumpsup}}</i>
+
+                                <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, childComment.replier)">
+                                    <span>回复</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <form id="childComment" ng-if="comment.isShowChildComment" novalidate>
+                            <div class="comment-text">
+                                <textarea autofocus maxlength="2000" ng-model="comment.scndlvlcmt"></textarea>
+                                <div style="text-align:right;">
+                                    <button class="btn btn-sm btn-default" style="float:left;" ng-click="hideSecondComment(comment)">取消</button>
+                                    <button class="btn btn-sm btn-info" ng-click="reply(saying.id, comment)">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close"
+                                    data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Delete
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            确定删除评论?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger" ng-click="confirm()">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div>
+            </div><!-- /.modal -->
+
+            <div class="modal fade" id="slcModal" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close"
+                                    data-dismiss="modal" aria-hidden="true">
+                                &times;
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Delete
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            确定删除评论?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger" ng-click="confirmSlc()">确认</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div>
+            </div><!-- /.modal -->
+        </div>
+    </div>
+    <div class="readBody cf">
+        <div class="readMain cf">
+
+
+
+        </div>
+    </div>
+    <div class="readPopup qrBox" style="display: none">
+        <a class="closePopup" href="javascript:void(0);" onclick="javascript:$('.maskBox,.qrBox').hide();"></a>
+        <div class="popupTit">
+            <h3>手机阅读</h3>
+        </div>
+        <div class="qrList">
+            <ul>
+            </ul>
+        </div>
+    </div>
+    <div class="readPopup setupBox" style="display: none;">
+        <a class="closePopup" href="javascript:void(0);" onclick="javascript:$('.maskBox,.setupBox').hide();"></a>
+        <div class="popupTit">
+            <h3>设置</h3>
+        </div>
+        <div class="setupList">
+            <ul>
+                <li class="readTheme">
+                    <em class="tit">阅读主题：</em>
+                    <a id="setup_color_white" class="white current"
+                       href="javascript:void(0);" title="白色" onclick="javascript:BookDetail.SetBackUpColor(1);"></a><a id="setup_color_green" class="green" href="javascript:void(0);" title="绿色"
+                                                                                                                       onclick="javascript:BookDetail.SetBackUpColor(2);"></a><a id="setup_color_pink" class="pink"
+                                                                                                                                                                                 href="javascript:void(0);" title="粉色" onclick="javascript:BookDetail.SetBackUpColor(3);"></a><a id="setup_color_yellow" class="yellow" href="javascript:void(0);" title="黄色"
+                                                                                                                                                                                                                                                                                 onclick="javascript:BookDetail.SetBackUpColor(4);"></a><a id="setup_color_gray" class="gray"
+                                                                                                                                                                                                                                                                                                                                           href="javascript:void(0);" title="灰色" onclick="javascript:BookDetail.SetBackUpColor(5);"></a><a id="setup_color_night" class="night" href="javascript:void(0);" title="夜间"
+                                                                                                                                                                                                                                                                                                                                                                                                                                           onclick="javascript:BookDetail.SetBackUpColor(6);"></a></li>
+                <li class="setFont setBtn"><em class="tit">正文字体：</em> <a id="setup_font_yahei" class="setYahei current"
+                                                                         href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(0);">雅黑</a> <a id="setup_font_simsun" class="setSimsun" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(1);">宋体</a> <a id="setup_font_ks" class="setKs" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFontFamily(2);">楷书</a> </li>
+                <li class="fontSize setBtn"><em class="tit">字体大小：</em> <a class="small" href="javascript:void(0);"
+                                                                          onclick="javascript:BookDetail.SetReadFont(-2);">A-</a><span class="current_font"
+                                                                                                                                       id="cFonts">
+                            16</span><a class="big" href="javascript:void(0);" onclick="javascript:BookDetail.SetReadFont(2);">A+</a> </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="maskBox" style="display: none">
+</div>
+<div id="showError">
+    <span id="LabErrorStatus"></span>
+</div>
+
+<div class="maskBox" style="display: none" onclick="javascript:uFans.closeBox();"></div>
+<div class="readPopup pcBox" style="display: none" id="showPC"></div>
+<div class="readPopup flowerBox" style="display: none" id="showFlower"></div>
+<div class="readPopup newsTipBox" style="display: none;" id="showNote"></div>
+
+<!--
+<div id="screenInput" class="screen_toolbar" >
+    <div style="height: 5px" class="layui-col-xs2 layui-col-sm3 layui-col-md4 layui-col-lg4"></div>
+    <div class="layui-col-xs6 layui-col-sm4 layui-col-md4 layui-col-lg4">
+        <input type="text" id="screenBulletText" required lay-verify="required" placeholder="请输入弹幕内容,右下角开关可控制弹幕是否开启" autocomplete="off"
+               class="layui-input">
+
+    </div>
+    <div class="layui-col-xs2 layui-col-sm1 layui-col-md1 layui-col-lg1">
+        <button class="layui-btn  layui-btn-danger send">发送</button>
+    </div>
+</div>
+<form id="screenSwitch" class="layui-form">
+    <div class="layui-form-item" style="position: fixed;right: 0px;bottom: 100px" title="弹幕开关">
+        &lt;!&ndash; <label  class="layui-form-label" style="opacity:0.5;font-weight: bold;color: red;">弹幕</label>&ndash;&gt;
+        <div class="layui-input-block">
+            <input class="clear" type="checkbox" name="switch" lay-skin="switch">
+        </div>
+    </div>
+</form>-->
+
+<script src="/javascript/require.js"></script>
+<link rel="stylesheet" href="/artDialog-6.0.4/css/ui-dialog.css">
+<script src="/artDialog-6.0.4/dist/dialog-min.js"></script>
+<script type="text/javascript" th:inline="javascript">
+    //获取html的uText内容
+    function getuText(){
+        var info1 = /*[[${bookContent.content}]]*/ '复制内容失败';
+        var waitReplace=/<i.*i>/g;
+        var replacement='';
+        var info=info1.replace(waitReplace,replacement);
+         info=info.replace(/<br>/g,replacement);
+        console.log(info1);
+
+        console.log(info);
+
+        //info='12';
+        copyUtil2(info);
+    }
+
+    function copyUtil2(info) {
+
+        let that = this
+        let txa = document.createElement('textarea')
+        let txval = 'SN:' + that.sn1 + '\n' + 'MAC:' + that.mac1 + '\n' + 'IMEI:' + that.imei1 + '\n' + 'PORT:' + that.port1
+        // console.log('copy val:', txval)
+        txa.value = info
+        document.body.appendChild(txa)
+        txa.select()
+        let res = document.execCommand('copy')
+        document.body.removeChild(txa)
+        console.log('copy success')
+        window.open("/author/index.html");
+    }
+</script>
+
+</script>
+<script language="javascript" type="text/javascript"  >
+    var lastcommentOb='';
+    //用来存储评论点赞的cookie
+
+    if( $.cookie('commentThumpCookie')==null){
+        $.cookie("commentThumpCookie",'{"Title":"存储flag的json"}');
+    }
+    if(localStorage.getItem('commentThumpStore')==null){
+        localStorage.setItem('commentThumpStore','{"Title":"存储flag的store"}');
+    }
+
+    function myFunction(id){
+       document.getElementById("demo").innerHTML=id;
+    }
+
+    //加载时会运行的代码
+    $(document).ready(function (){
+      //你的代码
+      addNextPageFromMysql();
+      changeLineNum();
+      changeCommentNum();
+      //用来测试的代码
+
+    });
+    //用来进行测试的函数
+    function showALert(datasegid){
+        alert(datasegid);
+    }
+    function changeCommentNum()
+    {
+          var commentNumOb=document.getElementsByName("commentNum");
+          var bookId=document.getElementById("bookId").value;
+          var pageId=document.getElementById("preContentId").value;
+
+          //  在初始化时调用
+          //刷新每行后面评论的数量
+          //根据传入 bookid ，pageid length 进行访问
+            $.ajax({
+                type: "get",
+                url: "/comment/getLineCommentNum",
+                data: {'bookId':bookId,'pageId':pageId,'lineMaxNum':commentNumOb.length+1},
+                dataType: "json",
+                success: function (returndata) {
+                    if(returndata!=""){
+                        //访问后传回一个列表
+                      var commentNumOb=document.getElementsByName("commentNum");
+
+                      for (let i=0; i<commentNumOb.length; i++){
+                           commentNumOb[i].innerHTML=returndata.lineNums[i];
+                           //commentNumOb[i].innerHTML=2;
+
+                          //根据ajax返回的数值，进行修改
+                      }
+                    }
+
+                },
+                error: function () {
+                    lock = false;
+                    //删除了下面这一行,可能会有问题,以后再处理吧  TODO
+                    //layer.alert('网络异常');
+                    alert("erro");
+                }
+            })
+
+    }
+
+
+
+    //弹出评论框代码
+
+    //给每一行的文字,都增加一个第几行的记录
+    function changeLineNum()
+    {
+          var commentNumOb=document.getElementsByName("commentNum");
+          var nowNum=0;
+          for (let i=0; i<commentNumOb.length; i++){
+              nowNum=nowNum+1;
+              commentNumOb[i].setAttribute("datasegid",nowNum);
+
+          }
+    }
+    function alertBookContent(){
+        var v1 = document.getElementById("showReading1").getAttribute("utext") ;
+    }
+
+
+    function showCommentDiv(commentOb) {
+        document.getElementById("nowLineId").value=commentOb.getAttribute("datasegid");
+        var v1 = document.getElementById("right-content1");
+        if (document.getElementById("preLineId").value!=document.getElementById("nowLineId").value) {
+            if(lastcommentOb!=''){
+               lastcommentOb.setAttribute('style','color: #B5B5B5;');
+
+
+            }
+            v1.style.display = "block";
+            commentOb.setAttribute('style','color: #d24c5f;');
+            lastcommentOb=commentOb;
+            document.getElementById("preLineId").value=document.getElementById("nowLineId").value;
+        } else {
+            if(document.getElementById("preLineId").value==document.getElementById("nowLineId").value){
+                v1.style.display = "none";
+                commentOb.setAttribute('style','color: #B5B5B5;');
+
+                document.getElementById("preLineId").value=0;
+            }
+        }
+    }
+
+
+    //在网页加载完成后,读取数据库,然后写入xml链接
+    function addNextPageFromMysql()
+    {
+        var bookId=document.getElementById("bookId").value;
+        var pageId=document.getElementById("preContentId").value;
+        $.ajax({
+            type: "get",
+            url: "/user/getMoreNextPage",
+            data: {'bookId':bookId,'pageId':pageId},
+            dataType: "json",
+            success: function (returndata) {
+                if(returndata!=""&&returndata!=null){
+                    var nexStr='{';
+                    for (var i = 0; i < returndata.pages.length; i++) {
+                        AddSignRow2(returndata.pages[i].linkurl,returndata.pages[i].title,returndata.pages[i].id,returndata.pages[i].thumbsupCount);
+                        nexStr+='"id'+returndata.pages[i].id+'":';
+                        nexStr+='"0",';
+                    }
+                    nexStr+='"weiba":"weiba"}';
+                    if( $.cookie('nextpagelinkFlagcookie')==null){
+                        $.cookie('nextpagelinkFlagcookie', nexStr);
+                    }
+
+
+
+                }
+
+            },
+            error: function () {
+                lock = false;
+                //删除了下面这一行,可能会有问题,以后再处理吧  TODO
+                //layer.alert('网络异常');
+            }
+        })
+    }
+    //二级评论点赞的功能
+    function sLCommentPraiseOnClick(iconOb){
+        //alert("开始点击");//可以
+        //点击后变色
+        if (iconOb.getAttribute("flag")=="0") {
+            iconOb.style.color="rgb(252, 85, 49)";
+            iconOb.innerHTML++;
+            iconOb.setAttribute("flag","1");
+            var  flc_id=iconOb.getAttribute("flcid");
+            var  slc_id=iconOb.getAttribute("slcid");
+            //console.log($.cookie('commentThumpCookie'));
+            //是否进行提交
+            var commentThumsJson = JSON.parse( localStorage.getItem('commentThumpStore'));
+            if(commentThumsJson["slc_id"+slc_id]=="0"){
+                //alert("可以提交11");
+                commentThumsJson["slc_id"+slc_id]="1";
+                localStorage.setItem('commentThumpStore',JSON.stringify(commentThumsJson));
+                $.ajax({
+                    type: "POST",
+                    url: "/user/addCommentThumbs2",
+                    data: {slc_id:slc_id},
+                    dataType: "json",
+                    success: function (data) {
+                        //alert("点赞成功!");
+                    }
+                 })
+
+            }
+        } else if (iconOb.getAttribute("flag")=="1") {
+            iconOb.innerHTML--;
+            iconOb.style.color="rgb(153, 154, 170)";
+            iconOb.setAttribute("flag","0");
+        }
+    }
+    //一级评论点赞的功能
+    function fLCommentPraiseOnClick(iconOb){
+        //alert("12");
+        //点击后变色
+        if (iconOb.getAttribute("flag")=="0") {
+            iconOb.style.color="rgb(252, 85, 49)";
+            iconOb.innerHTML++;
+            iconOb.setAttribute("flag","1");
+            var  flc_id=iconOb.getAttribute("flc_id");
+            //console.log(localStorage.getItem('commentThumpStore'));
+            //是否进行提交
+            var commentThumsJson = JSON.parse( localStorage.getItem('commentThumpStore'));
+            if(commentThumsJson["flc_id"+flc_id]=="0"){
+                //alert("可以提交11");
+                commentThumsJson["flc_id"+flc_id]="1";
+                //$.cookie("commentThumpCookie",JSON.stringify(commentThumsJson));
+                localStorage.setItem('commentThumpStore',JSON.stringify(commentThumsJson));
+                $.ajax({
+                    type: "POST",
+                    url: "/user/addCommentThumbs",
+                    data: {flc_id:flc_id},
+                    dataType: "json",
+                    success: function (data) {
+                        //alert("点赞成功!");
+                    }
+                 })
+
+            }
+        } else if (iconOb.getAttribute("flag")=="1") {
+            iconOb.innerHTML--;
+            iconOb.style.color="rgb(153, 154, 170)";
+            iconOb.setAttribute("flag","0");
+        }
+    }
+
+    //下一章链接点赞功能的实现
+    function praiseOnClick(iconOb){
+        //点击后变色
+        if (iconOb.getAttribute("flag")=="0") {
+            iconOb.style.color="rgb(252, 85, 49)";
+            iconOb.innerHTML++;
+            //是否进行提交
+            var storedlinkFlagJSON = JSON.parse($.cookie('nextpagelinkFlagcookie'));
+            //console.log(storedlinkFlagJSON.name);
+            var  linkid=iconOb.getAttribute("bataseid");
+            //alert(iconOb.bataseid);
+            if(storedlinkFlagJSON["id"+linkid]=="0"){
+                //alert("可以提交");
+                storedlinkFlagJSON["id"+linkid]="1";
+                $.cookie('nextpagelinkFlagcookie', JSON.stringify(storedlinkFlagJSON));
+                $.ajax({
+                    type: "POST",
+                    url: "/author/addNextPageThums",
+                    data: {pagelinkId:linkid},
+                    dataType: "json",
+                    success: function (data) {
+                        //alert("点赞成功!");
+                    }
+                 })
+            }
+            iconOb.setAttribute("flag","1");
+        } else if (iconOb.getAttribute("flag")=="1") {
+            iconOb.innerHTML--;
+            iconOb.style.color="rgb(153, 154, 170)";
+            iconOb.setAttribute("flag","0");
+        }
+
+        //上传数据
+        // 下面是延时1s，向某个url发送请求。
+<!--        setTimeout(() => {-->
+<!--            if(iconOb.getAttribute("flag")=="1"){-->
+<!--                 $.ajax({-->
+<!--                    type: "POST",-->
+<!--                    url: "/author/addMoreNextPage",-->
+<!--                    data: {'pageTitle':pageTitle,'pageLink':pageLink,'bookId':bookId,'pageId':pageId},-->
+<!--                    dataType: "json",-->
+<!--                    success: function (data) {-->
+
+<!--                    }-->
+<!--                 })-->
+
+<!--            }-->
+
+<!--        }, 4000);-->
+
+
+
+    }
+
+    //点击后弹出输入框 请输入下一章链接
+    function addNextPage()
+    {
+        var bookId=document.getElementById("bookId").value;
+        var pageId=document.getElementById("preContentId").value;
+        var d = dialog({
+        title: '消息',
+        content: '请输入下一章题目:<input id="add-page-title" value="" /></br>请输入下一章链接:<input id="add-page-link" value="" />',
+        ok: function () {
+          var pageTitle = $('#add-page-title').val();
+          var pageLink = $('#add-page-link').val();
+          AddSignRow(pageLink,pageTitle);
+          addNextPage2(pageTitle,pageLink,bookId,pageId);
+        }
+        });
+        d.show();
+    }
+    //在数据库里写入
+    function addNextPage2(pageTitle,pageLink,bookId,pageId)
+    {
+            $.ajax({
+            type: "POST",
+            url: "/author/addMoreNextPage",
+            data: {'pageTitle':pageTitle,'pageLink':pageLink,'bookId':bookId,'pageId':pageId},
+            dataType: "json",
+            success: function (data) {
+
+            },
+            error: function () {
+                lock = false;
+                layer.alert('网络异常');
+            }
+        })
+    }
+    //追加html2
+    function AddSignRow2(linkVar,titleVar,id,thumbsupCount){
+         //<div id="SignFrame2" class="flex-container">
+        //var num='1';
+        var sb='<a  href="';
+        sb+=linkVar;
+        sb+='">';
+        sb+=titleVar;
+        sb+='</a>';
+        sb+='<br>';
+        sb+='<i class="layui-icon layui-icon-praise" bataseid="';
+        sb+=id;
+        sb+='" onclick="praiseOnClick(this)" flag="0" style="font-size: 18px; color: #849FB3;" >'
+        sb+=thumbsupCount;
+        sb+='</i>';
+        var  tmp = document.createElement( 'div' );//创建一个div
+        tmp.className="flex-item";
+        var SignFrame=tmp.innerHTML+=sb;//添加到div里
+          //num++;
+        document.getElementById( 'SignFrame2' ).appendChild(tmp);//添加到你指的的id的地方
+
+    }
+
+    //追加html1
+    function AddSignRow(linkVar,titleVar){
+        //<div id="SignFrame2" class="flex-container">
+        //var num='1';
+        var sb='<a  href="';
+        sb+=linkVar;
+        sb+='">';
+        sb+=titleVar;
+        sb+='</a>';
+        sb+='<br>';
+        sb+='<i class="layui-icon layui-icon-praise" bataseid="" onclick="praiseOnClick(this)" flag="0" style="font-size: 18px; color: #849FB3;" >0</i>';
+        var  tmp = document.createElement( 'div' );//创建一个div
+        tmp.className="flex-item";
+        var SignFrame=tmp.innerHTML+=sb;//添加到div里
+          //num++;
+        document.getElementById( 'SignFrame2' ).appendChild(tmp);//添加到你指的的id的地方
+    }
+    if(font){
+        $(".readBox").css("font-size", font + "px");
+        $("#cFonts").html(font);
+        $("#ChapterBody").attr("class","article-content font"+font);
+        BookDetail.reShowCover();
+    }
+    if(fontNum){
+        BookDetail.SetReadFontFamily(fontNum);
+    }
+    if(colorNum){
+        BookDetail.SetBackUpColor(colorNum);
+        if(colorNum == 6){
+            $(".logo img").attr("src", "/images/logo_white.png");
+        }
+    }
+    //查询是否在书架
+    $.ajax({
+        type: "get",
+        url: "/user/queryIsInShelf",
+        data: {'bookId':$("#bookId").val()},
+        dataType: "json",
+        success: function (data) {
+            if (data.code == 200) {
+                if(data.data){
+                    $("#cFavs").html("<a class=\"ico_shelf\" href=\"javascript:void(0);\"><b>已收藏</b></a>");
+                }
+                //添加阅读记录
+                $.ajax({
+                    type: "POST",
+                    url: "/user/addReadHistory",
+                    data: {'bookId': $("#bookId").val(), 'preContentId': $("#preContentId").val()},
+                    dataType: "json",
+                    success: function (data) {
+
+                    },
+                    error: function () {
+                    }
+                })
+
+
+            } else if(data.code == 1001){
+                //未登录
+
+            }else {
+                layer.alert(data.msg);
+            }
+
+        },
+        error: function () {
+            layer.alert('网络异常');
+        }
+    })
+
+
+    var bookId = $("#bookId").val();
+    var indexId = $("#preContentId").val();
+    var preIndexId = $("#preIndexId").val();
+    var nextIndexId = $("#nextIndexId").val();
+    $(function () {
+        BookDetail.GetReadSet(bookId,indexId,preIndexId,nextIndexId,1);
+        $(".ico_setup").click(function () {
+
+            $(".maskBox,.setupBox").show();
+        });
+        $(".ico_phone").click(function () {
+            $(".maskBox,.qrBox").show();
+        });
+
+        $(window).scroll(function () {
+            var vtop = $(document).scrollTop();
+            var vbottom = $(document).height() - vtop - $(window).height();
+            if (vtop > 50) {
+                $(".menu_left").css("position", "fixed"); $(".menu_left").css("top", "2px");
+            }
+            else {
+                $(".menu_left").css("position", "absolute"); $(".menu_left").css("top", "60px")
+            }
+
+            if (vbottom < 150) {
+                $(".menu_right").css("position", "absolute"); $(".menu_right").css("bottom", "150px");
+            }
+            else {
+                $(".menu_right").css("position", "fixed"); $(".menu_right").css("bottom", "2px");
+            }
+        });
+
+        var bgClass = '1';
+        if (bgClass == 6) {
+            $(".logo img").attr("src", "/images/logo_white.png");
+        }
+        $(".readTheme a").click(function () {
+            $(".logo img").attr("src", "/images/logo.png");
+        })
+        $("#setup_color_night").click(function () {
+            $(".logo img").attr("src", "/images/logo_white.png");
+        });
+
+
+    });
+
+    function enterPreIndexPage(bookId,bookIndexId){
+        if(bookIndexId != 0){
+            window.location.href = '/book/'+bookId+'/'+bookIndexId+".html";
+        }else{
+            window.location.href = '/book/indexList-' + bookId + '.html';
+        }
+
+    }
+    function enterNextIndexPage(bookId,bookIndexId){
+        if(bookIndexId != 0){
+            window.location.href = '/book/'+bookId+'/'+bookIndexId+".html";
+        }else{
+            window.location.href = '/book/indexList-' + bookId + '.html';
+        }
+
+    }
+
+    function buyBookIndex(){
+        $.ajax({
+            type: "POST",
+            url: "/user/buyBookIndex",
+            data: {'bookId':$("#bookId").val(),"bookName":$("#bookName").val(),
+                "bookIndexId":$("#preContentId").val(),"bookIndexName":$("#preIndexName").val()},
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 200) {
+                   location.reload();
+
+
+                } else if(data.code == 1001){
+                    //未登录
+                    location.href = '/user/login.html?originUrl='+decodeURIComponent(location.href);
+
+                }else {
+                    layer.alert(data.msg);
+                }
+
+            },
+            error: function () {
+                layer.alert('网络异常');
+            }
+        })
+
+    }
+
+    $.post("/book/addVisitCount", {"bookId": $("#bookId").val()}, function () {
+    });
+
+</script>
+</body>
+</html>

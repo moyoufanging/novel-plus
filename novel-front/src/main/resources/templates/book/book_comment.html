@@ -1,0 +1,639 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head th:replace="common/header :: common_head(~{::title},~{::meta},~{::link},~{})">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${book.bookName}+'作品评论区_'+${application.website.name}"></title>
+    <meta name="keywords" th:content="${book.bookName}+'官方首发,'+${book.bookName}+'小说,'+${book.bookName}+'最新章节,'+${book.bookName}+'txt下载,'+${book.bookName}+'无弹窗,'+${book.bookName}+'吧,'+${book.bookName}+'离线完本'" />
+    <meta name="description" th:content="${book.bookName}+','+${book.bookName}+'小说阅读,'+${application.website.name}+'提供'+${book.bookName}+'首发最新章节及txt下载,'+${book.bookName}+'最新更新章节,精彩尽在'+${application.website.name}+'。'" />
+    <link href="/css/main.css" rel="stylesheet" />
+    <link href="/css/book.css" rel="stylesheet" />
+    <!-- 下面是评论区的部分 -->
+    <script src="/artDialog-6.0.4/lib/jquery-1.10.2.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/javascript/jquery.cookie.js"></script>
+    <script src="/javascript/common.js"></script>
+    <!-- 下面是评论区的富文本编辑器的部分 start-->
+    <link href="https://cdn.bootcdn.net/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet"> -->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <link href="/WangEditorNew/css/layout.css" rel="stylesheet">
+
+    <script src="/WangEditorNew/js/custom-elem.js"></script>
+
+    <!-- 下面是评论区的富文本编辑器的部分 end-->
+</head>
+<link href="/layui/css/layui.css" rel="stylesheet"/>
+
+<body>
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/index.css">
+<!-- angular 的转移部分 -->
+<script src="/js/angular.js"></script>
+<script src="https://cdn.staticfile.org/angular.js/1.5.0-beta.0/angular-sanitize.min.js"></script>
+<script src="/js/commentshuyou.js"></script>
+<input type="hidden" id="bookId" th:value="${book.id}"/>
+<input type="hidden" id="nowLineId" value="0"/>
+<input type="hidden" id="preLineId" value="-5"/>
+<input type="hidden" id="nowLineclickNum" value="0"/>
+<div th:replace="common/top :: top('')">
+</div>
+
+<div id="contentMainContainer"  class="main box_center cf mb50" ng-controller="mainController" ng-app="app" style="width: 60%;">
+    <div class="channelBookContent cf">
+        <!-- rigtht rigtht start comment-->
+        <div id="right-content1" style="width:25%;float:right;display: none;">
+            <div >
+                <div class="alert alert-warning hintDiv" id="hintDiv">
+                    <strong>评论不能为空</strong>
+                </div>
+
+                <div class="container" style="width:90%;float:left">
+                    <div class="saying" style="visibility:hidden">
+                        <div class="meta-top">
+                            <!--avatar-->
+
+
+                            <a href="javascript:void(0);">
+                                <div ng-if="saying.avatar=='null'">
+                                    <img class="avatar" ng-src="/images/man.png" src="/images/man.png">
+                                </div>
+                                <div ng-if="saying.avatar!='null'">
+                                    <img class="avatar" ng-src="/{{saying.avatar}}">
+                                </div>
+                            </a>
+                            <!--nickname-->
+                            <p class="author">
+                                <a class="name" href="javascript:void(0);">{{saying.author}}</a>
+                            </p>
+                            <!--create time-->
+                            <span class="publish-time">{{saying.createTime}}</span>
+                        </div>
+                        <!--content-->
+                        <p class="content">{{saying.sayingContent}}</p>
+                    </div>
+
+                    <div class="comment-footer clearfix" style="visibility:hidden">
+                        <a class="like pull-left" href="javascript:void(0);" ng-click="like(saying.id)">
+                            <span ng-if="isShowLike" class="glyphicon glyphicon-heart"></span>
+                            <span ng-if="!isShowLike" class="glyphicon glyphicon-heart-empty"></span>
+                            <span>喜欢({{saying.likes.length}})</span>
+                        </a>
+                        <a class="like" href="javascript:void(0);">
+                            <span class="glyphicon glyphicon-share-alt"></span>
+                            <span>分享</span>
+                        </a>
+                    </div>
+
+                    <div class="commment-head">
+                        <span class="pull-left" style="margin-top:0px;">
+                          {{saying.flcs.length}}条评论
+                        </span>
+                        <a class="like" href="javascript:void(0);" onclick="flcommentShow()">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                            <span>添加新评论</span>
+                        </a>
+                    </div>
+
+                    <!--comment text-->
+                    <div id="comment" style="display: none;" >
+<!--                    <div id="comment" ng-if="isShowComment" novalidate>-->
+                        <div class="comment-text" >
+<!--                            <textarea autofocus placeholder="写下你的评论…" maxlength="2000" ng-model="cmt.fstlvlcmt"></textarea>-->
+
+                            <div style="text-align:right;">
+<!--                                <button class="btn btn-sm btn-default" style="float:left;" ng-click="showComment()">取消</button>-->
+                                <button class="btn btn-sm btn-info" ng-click="firstCommentbeforeShuyou(saying.id)">提交</button>
+                            </div>
+                            <!-- 下面是评论区的富文本编辑器的部分 start-->
+                            <div class="page-container">
+
+                                <div class="page-right">
+                                    <!-- 编辑器 DOM -->
+                                    <div style="border: 1px solid #ccc;">
+                                        <div id="editor-toolbar" style="border-bottom: 1px solid #ccc;"></div>
+                                        <div id="editor-text-area" style="height: 500px"></div>
+                                    </div>
+
+                                    <!-- 内容状态 -->
+                                    <p style="background-color: #f1f1f1;">
+                                        Text length: <span id="total-length"></span>；
+                                        Selected text length: <span id="selected-length"></span>；
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 下面是评论区的富文本编辑器的部分 end-->
+                        </div>
+                    </div>
+
+                    <div class="comment-list">
+                        <!--first level comment-->
+                        <div class="first-level" ng-repeat="comment in saying.flcs">
+                            <div class="meta-top">
+                                <a href="javascript:void(0);">
+
+
+                                    <div ng-if="comment.avatar=='null'">
+                                        <img class="avatar" ng-src="/images/man.png" src="/images/man.png">
+                                    </div>
+                                    <div ng-if="comment.avatar!='null'">
+                                        <img class="avatar" ng-src="{{comment.avatar}}">
+                                    </div>
+                                </a>
+                                <p class="author">
+                                    <a class="name" href="javascript:void(0);">{{comment.commenter}}</a>
+                                </p>
+                                <div class="comment-footer clearfix">
+                                    <span class="publish-time pull-left" style="margin-top:0px;">{{comment.commentTime}}</span>
+                                    <i class="layui-icon layui-icon-praise" flc_id="{{comment.id}}" onclick="fLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{comment.thumpsup}}</i>
+                                    <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, comment.commenter)">
+                                        <span>回复</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="content" ng-bind-html="comment.commentContent"></p>
+
+                            <!--second level comment-->
+                            <div class="second-level" ng-repeat="childComment in comment.slcs">
+                                <p class="reply">
+                                    <a href="javascript:void(0);" class="blue-link">{{childComment.replier}}</a>:
+                                    <a href="javascript:void(0);" class="blue-link">@{{childComment.toCommenter}}</a>
+                                    <span>{{childComment.replyContent}}</span>
+                                </p>
+                                <div class="comment-footer clearfix">
+                              <span class="publish-time pull-left" style="margin-top:0px;">
+                                {{childComment.replyTime}}
+                              </span>
+                                    <i class="layui-icon layui-icon-praise" flcid="{{childComment.flcId}}" slcid="{{childComment.id}}" onclick="sLCommentPraiseOnClick(this)" flag="0" style="font-size: 15px; color: #849FB3;">{{childComment.thumpsup}}</i>
+
+                                    <a class="like delete-reply" href="javascript:void(0);" ng-click="showSecondComment(comment, childComment.replier)">
+                                        <span>回复</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <form id="childComment" ng-if="comment.isShowChildComment" novalidate>
+                                <div class="comment-text">
+                                    <textarea autofocus maxlength="2000" ng-model="comment.scndlvlcmt"></textarea>
+
+
+                                    <div style="text-align:right;">
+                                        <button class="btn btn-sm btn-default" style="float:left;" ng-click="hideSecondComment(comment)">取消</button>
+                                        <button class="btn btn-sm btn-info" ng-click="samehobbyreply(saying.id, comment)">提交</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="commentModal" tabindex="-1" role="dialog"
+                     aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close"
+                                        data-dismiss="modal" aria-hidden="true">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    Delete
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                确定删除评论?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-danger" ng-click="confirm()">确认</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div>
+                </div><!-- /.modal -->
+
+                <div class="modal fade" id="slcModal" tabindex="-1" role="dialog"
+                     aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close"
+                                        data-dismiss="modal" aria-hidden="true">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    Delete
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                确定删除评论?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-danger" ng-click="confirmSlc()">确认</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div>
+                </div><!-- /.modal -->
+            </div>
+        </div>
+        <!-- rigtht rigtht end-->
+        <!--left start-->
+        <div class="wrap_left fl" style="float:right;">
+            <div class="wrap_bg">
+                <div class="pad20">
+                    <!-- 作者设计的书友圈文本 start-->
+                    <div class="bookComment">
+                        <div id="bookChapter1" class="bookChapter">
+                            <div class="book_tit">
+                                <div class="fl">
+                                    <h3>书友圈</h3></div>
+                                <a class="fr" th:href="'/book/comment-'+${book.id}+'.html'">全部内容</a>
+
+
+                            </div>
+                            <!-- 测试评论功能的代码 start -->
+<!--                            <i name="commentNum" datasegid="1"    ng-click="showSameHobbyCWL();setcommentUser();" onclick="showCommentDiv(this)" style="color:#B5B5B5;" class="layui-icon layui-icon-reply-fill"></i>-->
+<!--                            <i name="commentNum" datasegid="1"    ng-click="setcommentUser();showSameHobbyCWL()" onclick="showCommentDiv(this)" style="color:#B5B5B5;" class="layui-icon layui-icon-reply-fill">0</i>-->
+                            <!-- 测试评论功能的代码 end-->
+                            <ul id="shuyouquanid" class="list cf" >
+
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 作者设计的书友圈文本 end-->
+                    <!-- 一人一条书籍文本 start-->
+                    <div class="bookComment">
+                        <div class="book_tit">
+                            <div class="fl">
+                                <h3>一人一条书籍评价</h3><span id="bookCommentTotal">(0条)</span>
+                            </div>
+                            <a class="fr" href="#txtComment">发表评论</a>
+                        </div>
+                        <div class="no_comment" id="noCommentPanel" style="display: none;">
+                            <img src="/images/no_comment.png" alt="" />
+                            <span class="block">暂无评论</span>
+                        </div>
+                        <div class="commentBar" id="commentPanel">
+
+                        </div>
+                        <div class="pageBox cf mt15 mr10" id="commentPage">
+                        </div>
+
+                        <div class="reply_bar" id="reply_bar">
+                            <div class="tit">
+                                <span class="fl font16">发表评论</span>
+                                <!--未登录状态下不可发表评论，显示以下链接-->
+                                <span class="fr black9" style="display:none; ">请先 <a class="orange" href="/user/login.html">登录</a><em class="ml10 mr10">|</em><a class="orange" href="/user/register.html">注册</a></span>
+                            </div>
+                            <textarea name="txtComment" rows="2" cols="20" id="txtComment" class="replay_text" placeholder="我来说两句..."></textarea>
+                            <div class="reply_btn">
+                                <span class="fl black9"><em class="ml5" id="emCommentNum">0/1000</em> 字</span>
+                                <span class="fr"><a class="btn_ora" href="javascript:void(0);" onclick="javascript:BookDetail.SaveComment(37,0,$('#txtComment').val());">发表</a></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 一人一条书籍文本 end-->
+
+                </div>
+            </div>
+        </div>
+        <!--left end-->
+
+        <!--right start-->
+        <div class="wrap_right fr" style="float:left;">
+
+
+
+            <div class="wrap_inner author_info mb20">
+
+                <div class="author_head cf">
+                    <a href="javascript:void(0);" class="head">
+                        <img src="/images/author_head.png" alt="作者头像"
+                                                                    id="authorLogoImg"/></a>
+                    <div class="msg">
+                        <span class="icon_qyzz" style="display:none;">签约作家</span>
+                        <h4><a th:href="'javascript:searchByK(\''+${book.authorName}+'\')'"
+                               th:text="${book.authorName}"></a></h4>
+                    </div>
+                </div>
+                <div class="author_intro cf"   style="display:none;">
+                    <h4>作者有话说</h4>
+                    <div class="intro_txt" id="authorNote">
+                        亲亲们，你们的支持是我最大的动力！求点击、求推荐、求书评哦！
+                    </div>
+                </div>
+                <!--如果作者没有其他作品就下方代码整个不显示-->
+
+
+            </div>
+            <!--作者专栏e-->
+            <script type="text/javascript">
+                var authorUId=8;
+                if(authorUId==0)
+                {$("#authorPanel").hide();}
+                else
+                {
+                }
+            </script>
+
+
+
+        </div>
+        <!--right end-->
+
+
+    </div>
+</div>
+<!-- 下面是评论区的富文本编辑器的部分 start-->
+<script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+<script>
+    const EM = window.wangEditor
+
+    // 切换语言
+    const LANG = location.href.indexOf('lang=en') > 0 ? 'en' : 'zh-CN'
+    EM.i18nChangeLanguage(LANG)
+
+    // 定义最大长度
+    const MAX_LENGTH = 100
+
+    window.editor = EM.createEditor({
+      selector: '#editor-text-area',
+      html: `<p>MaxLength: ${MAX_LENGTH}</p><p><br></p>`,
+      config: {
+        placeholder: 'Type here...',
+        maxLength: MAX_LENGTH,
+        onMaxLength(editor) {
+          alert('Trigger maxlength callback')
+        },
+        MENU_CONF: {
+          uploadImage: {
+            fieldName: 'your-fileName',
+            base64LimitSize: 10 * 1024 * 1024 // 10M 以下插入 base64
+          }
+        },
+        onChange(editor) {
+          console.log(editor.getHtml())
+
+          // 选中文字
+          const selectionText = editor.getSelectionText()
+          document.getElementById('selected-length').innerHTML = selectionText.length
+          // 全部文字
+          const text = editor.getText().replace(/\n|\r/mg, '')
+          document.getElementById('total-length').innerHTML = text.length
+        }
+      }
+    })
+
+    window.toolbar = EM.createToolbar({
+      editor,
+      selector: '#editor-toolbar',
+      config: {
+            excludeKeys: ['fullScreen','uploadVideo','uploadImage']
+      }
+    })
+
+
+
+  </script>
+
+<!-- 下面是评论区的富文本编辑器的部分 end-->
+<div th:replace="common/footer :: footer">
+</div>
+<div th:replace="common/js :: js"></div>
+
+<script src="/javascript/require.js"></script>
+<link rel="stylesheet" href="/artDialog-6.0.4/css/ui-dialog.css">
+<script src="/artDialog-6.0.4/dist/dialog-min.js"></script>
+<script src="/javascript/bookdetail.js" type="text/javascript"></script>
+
+<script language="javascript" type="text/javascript">
+    var lastcommentOb='';
+
+    getAuthorImage();
+    $(document).ready(function (){
+        //changeLineNum();
+        if(localStorage.getItem('commentThumpStoreshuyou')==null){
+            localStorage.setItem('commentThumpStoreshuyou','{"Title":"存储flag的store"}');
+        }
+    });
+
+    //签约作家的处理问题
+    function flcommentShow(){
+
+        var v1=document.getElementById("comment");
+
+        if (v1.style.display == "none") {
+            v1.style.display = "block";
+        } else {
+            v1.style.display = "none";
+        }
+    }
+    //给每一行的文字,都增加一个第几行的记录
+    function changeLineNum(){
+          var commentNumOb=document.getElementsByName("commentNum");
+          var nowNum=0;
+          for (let i=0; i<commentNumOb.length; i++){
+              nowNum=nowNum+1;
+              commentNumOb[i].setAttribute("datasegid",nowNum);
+
+          }
+    }
+
+    $('#txtComment').on('input propertychange', function () {
+        var count = $(this).val().length;
+        $('#emCommentNum').html(count + "/1000");
+        if (count > 1000) {
+            $('#txtComment').val($('#txtComment').val().substring(0, 1000));
+        }
+    });
+    //获取作者的头像
+    function getAuthorImage(){
+        $.ajax({
+            type: "GET",
+            url: "/book/getAuthorImage",
+            data: {bookId:$("#bookId").val()},
+            dataType: "json",
+            success: function (data) {
+                //alert(data.data);
+                //失败 $('#authorLogoImg').setAttribute("src",data.data);
+                if(data.data!=null&&data.data!=''){
+                               var obj = document.getElementById("authorLogoImg");
+
+                        var imgSrc = obj.setAttribute("src",data.data);//把图片修改为目标路径
+
+                }
+            }
+         })
+    }
+    searchComments(1, 20);
+    //二级评论点赞的功能
+    function sLCommentPraiseOnClick(iconOb){
+        //alert("开始点击");//可以
+        //点击后变色
+        if (iconOb.getAttribute("flag")=="0") {
+            iconOb.style.color="rgb(252, 85, 49)";
+            iconOb.innerHTML++;
+            iconOb.setAttribute("flag","1");
+            var  flc_id=iconOb.getAttribute("flcid");
+            var  slc_id=iconOb.getAttribute("slcid");
+            //console.log($.cookie('commentThumpCookie'));
+            //是否进行提交
+            var commentThumsJson = JSON.parse( localStorage.getItem('commentThumpStoreshuyou'));
+            if(commentThumsJson["slc_id"+slc_id]=="0"){
+                //alert("可以提交11");
+                commentThumsJson["slc_id"+slc_id]="1";
+                localStorage.setItem('commentThumpStoreshuyou',JSON.stringify(commentThumsJson));
+                $.ajax({
+                    type: "POST",
+                    url: "/user/shuyouaddCommentThumbs2",
+                    data: {slc_id:slc_id},
+                    dataType: "json",
+                    success: function (data) {
+                        //alert("点赞成功!");
+                    }
+                 })
+
+            }
+        } else if (iconOb.getAttribute("flag")=="1") {
+            iconOb.innerHTML--;
+            iconOb.style.color="rgb(153, 154, 170)";
+            iconOb.setAttribute("flag","0");
+        }
+    }
+    //一级评论点赞的功能
+    function fLCommentPraiseOnClick(iconOb){
+        //alert("12");
+        //点击后变色
+        if (iconOb.getAttribute("flag")=="0") {
+            iconOb.style.color="rgb(252, 85, 49)";
+            iconOb.innerHTML++;
+            iconOb.setAttribute("flag","1");
+            var  flc_id=iconOb.getAttribute("flc_id");
+            //console.log(localStorage.getItem('commentThumpStoreshuyou'));
+            //是否进行提交
+            var commentThumsJson = JSON.parse( localStorage.getItem('commentThumpStoreshuyou'));
+            if(commentThumsJson["flc_id"+flc_id]=="0"){
+                //alert("可以提交11");
+                commentThumsJson["flc_id"+flc_id]="1";
+                //$.cookie("commentThumpCookie",JSON.stringify(commentThumsJson));
+                localStorage.setItem('commentThumpStoreshuyou',JSON.stringify(commentThumsJson));
+                $.ajax({
+                    type: "POST",
+                    url: "/user/shuyouaddCommentThumbs",
+                    data: {flc_id:flc_id},
+                    dataType: "json",
+                    success: function (data) {
+                        //alert("点赞成功!");
+                    }
+                 })
+
+            }
+        } else if (iconOb.getAttribute("flag")=="1") {
+            iconOb.innerHTML--;
+            iconOb.style.color="rgb(153, 154, 170)";
+            iconOb.setAttribute("flag","0");
+        }
+    }
+    function showCommentDiv(commentOb) {
+
+        document.getElementById("nowLineId").value=parseInt(commentOb.getAttribute("datasegid"));
+        var v1 = document.getElementById("right-content1");
+        var div1 = document.getElementById('contentMainContainer');
+        if (document.getElementById("preLineId").value!=document.getElementById("nowLineId").value) {
+            if(lastcommentOb!=''){
+               lastcommentOb.setAttribute('style','color: #B5B5B5;');
+
+
+            }
+            v1.style.display = "block";
+            commentOb.setAttribute('style','color: #d24c5f;');
+            lastcommentOb=commentOb;
+
+            div1.style.width= "90%";
+            document.getElementById("preLineId").value=document.getElementById("nowLineId").value;
+
+        } else {
+            if(document.getElementById("preLineId").value==document.getElementById("nowLineId").value){
+                v1.style.display = "none";
+                commentOb.setAttribute('style','color: #B5B5B5;');
+                document.getElementById("preLineId").value=0;
+                div1.style.width= "60%";
+
+            }
+        }
+    }
+    function searchComments(curr, limit) {
+
+        $.ajax({
+            type: "get",
+            url: "/book/listCommentByPage",
+            data: {'bookId': $("#bookId").val(),'curr':curr,'limit':limit},
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 200) {
+                    var commentList = data.data.list;
+                    if (commentList.length > 0) {
+                        $("#bookCommentTotal").html("("+data.data.total+"条)");
+                        var commentListHtml = "";
+                        for (var i = 0; i < commentList.length; i++) {
+                            var comment = commentList[i];
+                            commentListHtml += ("<div class=\"comment_list cf\">" +
+                                "<div class=\"user_heads fl\" vals=\"389\">" +
+                                "<img src=\""+(comment.createUserPhoto ? comment.createUserPhoto : '/images/man.png')+"\" class=\"user_head\" alt=\"\">" +
+                                "<span class=\"user_level1\" style=\"display: none;\">见习</span></div>" +
+                                "<ul class=\"pl_bar fr\">\t\t\t<li class=\"name\">"+(comment.createUserName.substr(0, 4) + "****" + comment.createUserName.substr(comment.createUserName.length - 3, 3))+"</li><li class=\"dec\">" +
+                                comment.commentContent+
+                                "</li><li class=\"other cf\">" +
+                                "<span class=\"time fl\">"+comment.createTime+"</span>" +
+                                "<span class=\"fr\"><a href=\"javascript:void(0);\" onclick=\"javascript:BookDetail.AddAgreeTotal(77,this);\" class=\"zan\" style=\"display: none;\">赞<i class=\"num\">(0)</i></a>" +
+                                "</span></li>\t\t</ul>\t</div>");
+                        }
+                        $("#commentPanel").html(commentListHtml);
+
+                        layui.use('laypage', function () {
+                            var laypage = layui.laypage;
+
+                            //执行一个laypage实例
+                            laypage.render({
+                                elem: 'commentPage' //注意，这里的 test1 是 ID，不用加 # 号
+                                , count: data.data.total //数据总数，从服务端得到,
+                                , curr: data.data.pageNum
+                                , limit: data.data.pageSize
+                                , jump: function (obj, first) {
+
+
+                                    //obj包含了当前分页的所有参数，比如：
+                                    console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                                    console.log(obj.limit); //得到每页显示的条数
+
+
+                                    //首次不执行
+                                    if (!first) {
+                                        searchComments(obj.curr, obj.limit);
+                                    } else {
+
+                                    }
+                                }
+                            });
+                        });
+
+                    }
+
+
+                } else {
+                    layer.alert(data.msg);
+                }
+
+            },
+            error: function () {
+                layer.alert('网络异常');
+            }
+        })
+
+    }
+</script>
+</body>
+</html>

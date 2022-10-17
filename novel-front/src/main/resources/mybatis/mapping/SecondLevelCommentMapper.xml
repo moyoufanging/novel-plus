@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java2nb.novel.mapper.SecondLevelCommentMapper" >
+	<insert id="insertSlcComment" useGeneratedKeys="true" keyProperty="id"  parameterType="com.java2nb.novel.vo.SecondLevelComment">
+		insert into commentsecondlevel(sayingId, flcId, replier, toCommenter, replyContent, replyTime,thumpsup2) values(
+		#{sayingId}, #{flcId}, #{replier}, #{toCommenter}, #{replyContent}, #{replyTime},0)
+	</insert>
+	
+	<delete id="deleteSlcComment">
+		delete from commentsecondlevel where slc_id = #{commentId} and sayingId = #{sayingId};
+	</delete>
+	<update id="addCommentThumbs" parameterType="Integer">
+		update commentsecondlevel set thumpsup2=thumpsup2+1 where slc_id = #{slcid} ;
+	</update>
+	<update id="shuyouaddCommentThumbs" parameterType="Integer">
+		update samehobbycsl set thumpsup2=thumpsup2+1 where slc_id = #{slcid} ;
+	</update>
+	<insert id="insertsamehobbySC" useGeneratedKeys="true" keyProperty="id"  parameterType="com.java2nb.novel.vo.SecondLevelComment">
+		insert into samehobbycsl(sayingId, flcId, replier, toCommenter, replyContent, replyTime,thumpsup2) values(
+		#{sayingId}, #{flcId}, #{replier}, #{toCommenter}, #{replyContent}, #{replyTime},0)
+	</insert>
+ </mapper>

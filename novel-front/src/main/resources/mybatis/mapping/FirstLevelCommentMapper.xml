@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java2nb.novel.mapper.FirstLevelCommentMapper" >
+	<insert id="insertFlcComment" useGeneratedKeys="true" keyProperty="id"  parameterType="com.java2nb.novel.vo.FirstLevelComment">
+		insert into commentfirstlevel(sayingId, commenter, commenterAvatar, commentContent, commentTime,pageid,bookid,lineid,thumpsup) values(
+		#{sayingId}, #{commenter}, #{avatar}, #{commentContent}, #{commentTime},#{pageId},#{bookId},#{lineId},0)
+	</insert>
+	
+	<delete id="deleteFlcComment">
+		delete from commentsecondlevel where flcId = #{commentId} and sayingId = #{sayingId};
+		delete from commentfirstlevel where flc_id = #{commentId} and sayingId = #{sayingId};
+	</delete>
+	
+	<update id="addCommentThumbs" parameterType="Integer">
+		update commentfirstlevel set thumpsup=thumpsup+1 where flc_id = #{flcid} ;
+	</update>
+	<update id="addshuyouCommentThumbs" parameterType="Integer">
+		update samehobbycfl set thumpsup=thumpsup+1 where flc_id = #{flcid} ;
+	</update>
+	<insert id="insertsamehobbyFC" useGeneratedKeys="true" keyProperty="id"  parameterType="com.java2nb.novel.vo.FirstLevelComment">
+		insert into samehobbycfl(sayingId, commenter, commenterAvatar, commentContent, commentTime,bookid,lineid,thumpsup) values(
+		#{sayingId}, #{commenter}, #{avatar}, #{commentContent}, #{commentTime},#{bookId},#{lineId},0)
+	</insert>
+
+ </mapper>

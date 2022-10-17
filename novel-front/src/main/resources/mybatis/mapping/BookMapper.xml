@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java2nb.novel.mapper.FrontBookMapper">
+
+    <select id="searchByPage" parameterType="com.java2nb.novel.vo.BookSpVO" resultType="com.java2nb.novel.vo.BookVO">
+        select
+        id,cat_id,cat_name,book_name,author_id,author_name,word_count,last_index_id,last_index_name,score,pic_url,book_status,last_index_update_time,book_desc
+        from book where word_count > 0
+        <if test="keyword != null and keyword != ''">
+            and (book_name like concat('%',#{keyword},'%') or author_name like concat('%',#{keyword},'%'))
+        </if>
+        <if test="workDirection != null">
+            and work_direction = #{workDirection}
+        </if>
+        <if test="catId != null">
+            and cat_id = #{catId}
+        </if>
+        <if test="isVip != null">
+            and is_vip = #{isVip}
+        </if>
+        <if test="bookStatus != null">
+            and book_status = #{bookStatus}
+        </if>
+        <if test="wordCountMin != null">
+            and word_count >= #{wordCountMin}
+        </if>
+        <if test="wordCountMax != null">
+            and word_count <![CDATA[ < ]]> #{wordCountMax}
+        </if>
+        <if test="updateTimeMin != null">
+            and last_index_update_time >= #{updateTimeMin}
+        </if>
+
+    </select>
+    <update id="updateisAlonePossess" parameterType="com.java2nb.novel.entity.Book">
+        update book set is_alone_possess = #{isAlonePossess}
+        where id = #{id}
+    </update>
+
+    <update id="addVisitCount" >
+        update book set visit_count = visit_count + ${visitCount}
+        where id = #{bookId}
+    </update>
+
+    <select id="listRecBookByCatId" parameterType="int" resultType="com.java2nb.novel.entity.Book">
+        select id,pic_url,book_name,book_desc
+        from book
+        where cat_id = #{catId}
+        order by RAND() LIMIT 4
+    </select>
+
+
+    <update id="addCommentCount" parameterType="long">
+        update book set comment_count = comment_count+1
+        where  id = #{bookId}
+    </update>
+
+    <select id="queryNetworkPicBooks" resultType="com.java2nb.novel.entity.Book">
+        select
+        id,pic_url from book
+        where pic_url like 'http%'
+        and pic_url not like concat('%',#{localPicPrefix},'%')
+        limit #{limit}
+    </select>
+
+    <select id="selectIdsByScoreAndRandom" parameterType="int" resultType="com.java2nb.novel.entity.Book">
+
+       select id,book_name,author_name,pic_url,book_desc,score from book ORDER BY score,RAND() LIMIT #{limit};
+   </select>
+    <update id="updateShuyouquanHtml" parameterType="com.java2nb.novel.vo.AuthorShuyouVO">
+        UPDATE shuyouquan_html SET content=#{ShuyouquanContent} WHERE `id`=#{bookId};
+
+    </update>
+    <select id="getShuyouquanHtml" parameterType="Long" resultType="String">
+        SELECT content from shuyouquan_html WHERE `id`=#{bookId};
+
+    </select>
+    <insert id="setShuyouquanHtml" parameterType="Long" >
+        INSERT INTO `shuyouquan_html` (`content`) VALUES ("");
+
+
+    </insert>
+    <select id="getBookAuthorId" parameterType="Long" resultType="Long">
+        SELECT author_id from book WHERE `id`=#{bookId};
+
+    </select>
+    <select id="getUserAuthorId" parameterType="Long" resultType="Long">
+        SELECT id from author WHERE `user_id`=#{user_id};
+    </select>
+    <select id="getAuhorImage" parameterType="Long" resultType="String">
+        select user_photo from (select user_id from author a1 left join book b2 on a1.id=b2.author_id where b2.id=#{bookId}) tmp1 left join user u1 on tmp1.user_id=u1.id ;
+
+    </select>
+</mapper>

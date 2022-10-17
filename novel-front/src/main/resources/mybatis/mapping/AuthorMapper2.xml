@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java2nb.novel.mapper.AuthorMapper2">
+
+    <update id="updatAccountDetail" parameterType="com.java2nb.novel.core.bean.AuthourAccountDetails">
+        UPDATE author
+        <set>
+            <if test="alipayId !=null">`alipayid`= #{alipayId},</if>
+            <if test="bankName !=null">`bankname`= #{bankName},</if>
+            <if test="subbranchName !=null">`subbranchname`= #{subbranchName},</if>
+            <if test="userName !=null">`username`= #{userName},</if>
+            <if test="bankCardNumber !=null">`bankcardnumber`= #{bankCardNumber}</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="getAuthorAccountInfo" parameterType="Long" resultType="com.java2nb.novel.core.bean.AuthourAccountDetails">
+        select alipayid,bankname,bankcardnumber,subbranchname,username from author where id=#{id};
+    </select>
+
+</mapper>

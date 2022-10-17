@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java2nb.novel.mapper.SayingMapper" >
+
+  <resultMap id="SayingMap" type="com.java2nb.novel.vo.Saying" >
+    <id column="saying_id" property="id" jdbcType="INTEGER" />
+    <result column="sayingContent" property="sayingContent" jdbcType="INTEGER" />
+    <result column="author" property="author" jdbcType="VARCHAR" />
+    <result column="sayingAvatar" property="avatar" jdbcType="VARCHAR" />
+    <result column="likes" property="likes" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <collection property="flcs" ofType="com.java2nb.novel.vo.FirstLevelComment" column="sayingId">
+        <id column="flc_id" property="id" jdbcType="INTEGER" />
+        <result column="sayingId" property="sayingId" jdbcType="INTEGER" />
+        <result column="commenter" property="commenter"/>
+        <result column="commenterAvatar" property="avatar"/>
+        <result column="commentContent" property="commentContent"/>
+        <result column="commentTime" property="commentTime" jdbcType="TIMESTAMP" />
+        <result column="thumpsup" property="thumpsup" jdbcType="INTEGER" />
+        <collection property="slcs" ofType="com.java2nb.novel.vo.SecondLevelComment" column="flcId">
+	        <id column="slc_id" property="id" jdbcType="INTEGER" />
+	        <result column="flcId" property="flcId" jdbcType="INTEGER" />
+	        <result column="replier" property="replier"/>
+	        <result column="toCommenter" property="toCommenter"/>
+	        <result column="replyContent" property="replyContent"/>
+	        <result column="replyTime" property="replyTime" jdbcType="TIMESTAMP" />
+            <result column="thumpsup2" property="thumpsup2" jdbcType="INTEGER" />
+        </collection>
+    </collection>
+  </resultMap>
+  
+    <select id="selectOneById" resultMap="SayingMap" parameterType="com.java2nb.novel.vo.CommentNumVO" >
+
+
+    select * from 
+    (select * from    commentsaying c left join  commentfirstlevel cf on c.saying_id=cf.sayingId where c.saying_id=#{id}) tmp left join commentsecondlevel cs
+    on tmp.flc_id = cs.flcId
+        where tmp.pageid=#{pageId} and tmp.bookid=#{bookId} and tmp.lineid=#{lineId}
+
+
+
+
+    </select>
+
+    <select id="selectSameHobbycommentById" resultMap="SayingMap" parameterType="com.java2nb.novel.vo.CommentNumVO" >
+
+
+        select * from
+        (select * from    commentsaying c left join  samehobbycfl cf on c.saying_id=cf.sayingId where c.saying_id=#{id}) tmp left join samehobbycsl cs
+        on tmp.flc_id = cs.flcId
+        where tmp.bookid=#{bookId} and tmp.lineid=#{lineId}
+
+
+
+
+    </select>
+
+    <select id="selectTest" resultType="int">
+        select slc_id=#{id} from commentsecondlevel ;
+    </select>
+
+    <select id="updateLikesById">
+   	update commentsaying set likes = #{likes} where saying_id = #{id}
+    </select>
+
+    <select id="getLineCommentNum" parameterType="com.java2nb.novel.vo.FirstLevelComment" resultType="Long">
+        select commentNum from comments_line_number
+        where pageid = #{pageId} and bookid=#{bookId} and lineid=#{lineId};
+    </select>
+
+    <update id="updateCommentNum"  parameterType="com.java2nb.novel.vo.FirstLevelComment">
+        update comments_line_number set commentNum=commentNum+1
+        where pageid = #{pageId} and bookid=#{bookId} and lineid=#{lineId}
+    </update>
+
+
+    <insert id="insertCommentNum" parameterType="com.java2nb.novel.vo.CommentNumVO">
+        insert into comments_line_number ( commentNum,pageid,bookid,lineid) values(#{commentNum},#{pageId},#{bookId},#{lineId});
+    </insert>
+ </mapper>

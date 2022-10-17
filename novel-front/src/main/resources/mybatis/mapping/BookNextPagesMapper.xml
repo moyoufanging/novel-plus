@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.java2nb.novel.mapper.FrontBookNextPageBuMapper">
+
+    <insert id="addNextPagevo" parameterType="com.java2nb.novel.entity.Book">
+        INSERT INTO book_nextPages
+        (novel_id,book_id,link_url,nextpage_name,nextpage_desc,thumbsup_count,reply_count)
+        values
+        (#{novel_id},#{book_id},#{link_url},#{nextpage_name},#{nextpage_desc},#{thumbsup_count},#{reply_count})
+    </insert>
+    <update id="updateCommentNum" parameterType="Long">
+        update book_nextPages set thumbsup_count=thumbsup_count+1 where id = #{id} ;
+    </update>
+    <select id="getMoreNextPage" parameterType="com.java2nb.novel.vo.BookNextPageBuVO" resultType="com.java2nb.novel.vo.BookNextPageBuVO1">
+        select link_url,nextpage_name,thumbsup_count,id from book_nextPages
+        <where>
+            <if test="novel_id != null">
+                and novel_id = #{novel_id}
+            </if>
+            <if test="book_id != null">
+                and book_id = #{book_id}
+            </if>
+
+        </where>
+    </select>
+</mapper>
