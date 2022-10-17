@@ -25,7 +25,7 @@
 2. 提供了作者的关键信息提交，包括银行账户部分
 3. 使用nginx转发，解决了部署后的跨域问题
 # 安装教程
-见wiki
+见[wiki](https://github.com/moyoufanging/novel-plus/wiki)
 # 后续计划
 详细进展见[这里](https://github.com/moyoufanging/novel-plus/wiki/%E5%90%8E%E7%BB%AD%E8%AE%A1%E5%88%92)
 ## 更好的二创系统 
