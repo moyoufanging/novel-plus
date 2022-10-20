@@ -1,4 +1,5 @@
 # 简介
+novel-plus 是一个多端（PC、WAP）阅读 、功能完善的小说 CMS 系统。包括小说推荐、小说检索、小说排行、小说阅读、小说书架、小说评论、小说爬虫、会员中心、作家专区、充值订阅、新闻发布功能。
 这是在[novelPlus](https://github.com/201206030/novel-plus) 3.6.1版本的基础上简单修改后的版本，只修改了novel-common和novel-plus的部分，如果遇到问题，建议先参考原项目。
 原项目的README.md在[这里](./READMEOld.md)
 # 增加的功能
